@@ -16,6 +16,7 @@ public class RestCommands {
 
     @ShellMethod("Retrieve OPTIONS from google.com")
     public String get() {
+        // TODO: check out https://docs.postman-echo.com/?version=latest
         String url = "https://jsonplaceholder.typicode.com/posts/1";
         return restTemplate.exchange(url, HttpMethod.GET, null, String.class).getBody();
     }
