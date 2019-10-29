@@ -1,9 +1,7 @@
 package com.jonathanrobertson.restflows.commands;
 
 import com.jonathanrobertson.restflows.services.MemoryService;
-import org.springframework.boot.json.BasicJsonParser;
 import org.springframework.boot.json.JsonParser;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +10,6 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.print.attribute.standard.Media;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -21,6 +17,7 @@ import java.util.StringJoiner;
 @ShellComponent
 public class RestCommands {
     private static final StringJoiner errJoiner = new StringJoiner("; ", "[!] request failed", "");
+    protected static final StringJoiner newlineJoiner = new StringJoiner("\n");
 
     private final JsonParser jsonParser;
     private final RestTemplate rest;
@@ -32,11 +29,17 @@ public class RestCommands {
         this.mem = mem;
     }
 
-    // GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE
-
     @ShellMethod("Retrieve GET from the provided place")
     public String get(String place) {
         return deserialize(request(HttpMethod.GET, place));
+    }
+
+    protected Object follow(String data, String key) {
+        return jsonParser.parseMap(data).get(key);
+    }
+
+    protected Object follow(String data, int index) {
+        return jsonParser.parseList(data).get(index);
     }
 
     private String deserialize(ResponseEntity<String> r) {
@@ -46,30 +49,13 @@ public class RestCommands {
             return "[no body provided in response]";
         }
 
-
-
         return Optional.ofNullable(r.getHeaders().getContentType())
                 .filter(type -> type.equalsTypeAndSubtype(MediaType.APPLICATION_JSON))
                 .map(type -> {
-                    StringJoiner joiner = new StringJoiner("\n");
-                    jsonParser.parseMap(r.getBody()).forEach((k, v) -> joiner.add(k + ": " + v));
-                    return joiner.toString();
+                    jsonParser.parseMap(r.getBody()).forEach((k, v) -> newlineJoiner.add(k + ": " + v));
+                    return newlineJoiner.toString();
                 })
                 .orElse(r.getBody());
-
-//        if (type.equalsTypeAndSubtype(MediaType.APPLICATION_JSON)) {
-//
-//        }
-
-//        if (r.getHeaders().getContentType().equalsTypeAndSubtype(MediaType.APPLICATION_JSON))
-
-//        switch () {
-//            case MediaType.APPLICATION_JSON:
-//            case MediaType.APPLICATION_JSON_UTF8:
-//                return "application/json"; // jsonParser.parseMap(r.getBody()).toString();
-//            default:
-//                return r.getBody();
-//        }
     }
 
     @ShellMethod("Retrieve HEAD from the provided place")

@@ -6,7 +6,7 @@ import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootConfiguration
-public class JsonParserConfiguration {
+public class JsonParserConfig {
 
     @Bean
     public JsonParser getJsonParser() {
