@@ -1,65 +1,73 @@
 package com.jonathanrobertson.restflows.commands;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.jonathanrobertson.restflows.enums.CommandContext;
-
 import com.jonathanrobertson.restflows.models.Place;
 import com.jonathanrobertson.restflows.services.MemoryService;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @ShellComponent
 public class ManagementCommands {
     private final MemoryService mem;
-    public ManagementCommands(MemoryService mem) {
+    private final ObjectMapper mapper;
+
+    public ManagementCommands(MemoryService mem, ObjectMapper mapper) {
         this.mem = mem;
+        this.mapper = mapper;
     }
 
     @ShellMethod("show values in memory; can filter on context")
-    public String show(CommandContext context) {
-        switch(context) {
+    public String show(@ShellOption(defaultValue = "NONE") CommandContext context, @ShellOption(value = {"-p", "--pretty"}, defaultValue = "false") boolean pretty) throws JsonProcessingException {
+        ObjectWriter w = pretty ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
+        switch (context) {
             case VAR:
-                return mem.vars.toString();
+                return w.writeValueAsString(mem.vars);
             case PLACE:
-                return mem.places.toString();
+                return w.writeValueAsString(mem.places);
             case FLOW:
                 return "not ready yet";
             default:
-                return mem.toString();
+                return w.writeValueAsString(mem);
         }
     }
 
-    @ShellMethod("set a value in memory")
-    public String set(CommandContext context, String name, String value) {
-        switch(context) {
-            case VAR:
-                mem.vars.put(name, value);
-                break;
-            case PLACE:
-                mem.places.put(name, new Place(value));
-                break;
-            case FLOW:
-                return "not ready yet";
-            default:
-                return "must provide a context";
-        }
+    @ShellMethod("make a variable")
+    public String mkv(String name, String value) {
+        mem.vars.put(name, value);
         return "[+] " + name + "=" + value;
     }
 
-    @ShellMethod("remove a value from memory")
-    public String rem(CommandContext context, String name) {
-        switch(context) {
-            case VAR:
-                mem.vars.remove(name);
-                break;
-            case PLACE:
-                mem.places.remove(name);
-            case FLOW:
-                return "not ready yet";
-            default:
-                return "must provide a context";
-        }
+    @ShellMethod("make a place")
+    public String mkp(String name, String value) {
+        mem.places.put(name, new Place(value));
+        return "[+] " + name + "=" + value;
+    }
+
+    @ShellMethod("make a flow")
+    public String mkf(String name, String value) {
+        return "not ready yet";
+    }
+
+    @ShellMethod("remove a variable")
+    public String rmv(String name) {
+        mem.vars.remove(name);
         return "[-] " + name;
+    }
+
+    @ShellMethod("remove a place")
+    public String rmp(String name) {
+        mem.places.remove(name);
+        return "[-] " + name;
+    }
+
+    @ShellMethod("remove a flow")
+    public String rmf(String name) {
+        return "not ready yet";
     }
 
     @ShellMethod("test place template")
