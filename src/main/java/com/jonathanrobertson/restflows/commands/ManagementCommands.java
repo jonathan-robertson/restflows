@@ -3,9 +3,9 @@ package com.jonathanrobertson.restflows.commands;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.jonathanrobertson.restflows.enums.CommandContext;
 import com.jonathanrobertson.restflows.models.Place;
 import com.jonathanrobertson.restflows.services.MemoryService;
+import com.jonathanrobertson.restflows.services.PathfinderService;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -15,25 +15,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ManagementCommands {
     private final MemoryService mem;
     private final ObjectMapper mapper;
+    private final PathfinderService pathfinder;
 
-    public ManagementCommands(MemoryService mem, ObjectMapper mapper) {
+    public ManagementCommands(MemoryService mem, ObjectMapper mapper, PathfinderService pathfinder) {
         this.mem = mem;
         this.mapper = mapper;
+        this.pathfinder = pathfinder;
     }
 
-    @ShellMethod("show values in memory; can filter on context")
-    public String show(@ShellOption(defaultValue = "NONE") CommandContext context, @ShellOption(value = {"-p", "--pretty"}, defaultValue = "false") boolean pretty) throws JsonProcessingException {
+    @ShellMethod("show values from memory")
+    public String show(@ShellOption(value = {"-f", "--filter"}, defaultValue = "") String filter, @ShellOption(value = {"-p", "--pretty"}, defaultValue = "false") boolean pretty) throws JsonProcessingException {
         ObjectWriter w = pretty ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
-        switch (context) {
-            case VAR:
-                return w.writeValueAsString(mem.vars);
-            case PLACE:
-                return w.writeValueAsString(mem.places);
-            case FLOW:
-                return "not ready yet";
-            default:
-                return w.writeValueAsString(mem);
-        }
+        return w.writeValueAsString(filter.length() > 0 ? pathfinder.follow(mapper.valueToTree(mem), filter) : mem);
     }
 
     @ShellMethod("make a variable")

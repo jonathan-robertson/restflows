@@ -11,13 +11,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {PathfinderService.class, ObjectMapperConfig.class})
 public class PathfinderServiceTest {
-    private static final String TEXT = "{ \"request\": { \"args\": [ { \"foo\": \"dance\" }, { \"foo\": \"at\" }, { \"foo\": \"midnight\" } ] } }";
+    private static final String TEXT = "{ \"request\": { \"args\": [ { \"foo\": \"dance\" }, { \"foo\": \"at\" }, { \"foo\": \"midnight\" } ] }, \"response\": { \"status\": 204 } }";
 
     @Autowired
     private PathfinderService pathfinderService;
 
     @Test
-    public void follow() {
+    public void followValueTest() {
         Assert.assertEquals("midnight", pathfinderService.follow(TEXT, "request.args[2].foo"));
+    }
+
+    @Test
+    public void followObjectTest() {
+        Assert.assertEquals("{\"status\":204}", pathfinderService.follow(TEXT, "response").toString());
     }
 }

@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 @Service
 public class PathfinderService {
-    private static final String pattern = "[.\\[]|]\\.";
+    private static final String pattern = "[.\\[]|]\\.|]$";
 
     private final ObjectMapper objectMapper;
 
@@ -20,16 +20,20 @@ public class PathfinderService {
 
     public Object follow(String json, String path) {
         try {
-            return follow(objectMapper.readTree(json), new ArrayList<>(Arrays.asList(path.split(pattern))));
+            return follow(objectMapper.readTree(json), path);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("unable to follow content", e);
         }
     }
 
+    public Object follow(JsonNode node, String path) {
+        return follow(node, new ArrayList<>(Arrays.asList(path.split(pattern)))); // TODO: find a better way to split path
+    }
+
     private Object follow(JsonNode node, ArrayList<String> path) {
         switch (node.getNodeType()) {
             case ARRAY:
-                return follow(node.get(Integer.parseInt(path.remove(0))), path);
+                return path.size() > 0 ? follow(node.get(Integer.parseInt(path.remove(0))), path) : node;
             case BINARY:
                 return node.asInt();
             case BOOLEAN:
@@ -51,7 +55,7 @@ public class PathfinderService {
                         return node.asDouble();
                 }
             case OBJECT:
-                return follow(node.get(path.remove(0)), path);
+                return path.size() > 0 ? follow(node.get(path.remove(0)), path) : node;
             case POJO:
                 return node;
             case STRING:
