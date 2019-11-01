@@ -6,38 +6,36 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.jonathanrobertson.restflows.models.Place;
 import com.jonathanrobertson.restflows.services.MemoryService;
 import com.jonathanrobertson.restflows.services.PathfinderService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
+
+@Slf4j
 @ShellComponent
 public class ManagementCommands {
     private final MemoryService mem;
-    private final ObjectMapper mapper;
-    private final PathfinderService pathfinder;
 
-    public ManagementCommands(MemoryService mem, ObjectMapper mapper, PathfinderService pathfinder) {
+    public ManagementCommands(MemoryService mem) {
         this.mem = mem;
-        this.mapper = mapper;
-        this.pathfinder = pathfinder;
     }
 
     @ShellMethod("show values from memory")
     public String show(@ShellOption(value = {"-f", "--filter"}, defaultValue = "") String filter, @ShellOption(value = {"-p", "--pretty"}, defaultValue = "false") boolean pretty) throws JsonProcessingException {
-        ObjectWriter w = pretty ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
-        return w.writeValueAsString(filter.length() > 0 ? pathfinder.follow(mapper.valueToTree(mem), filter) : mem);
+        return mem.showMemory(filter, pretty);
     }
 
     @ShellMethod("make a variable")
     public String mkv(String name, String value) {
-        mem.vars.put(name, value);
+        mem.getVars().put(name, value);
         return "[+] " + name + "=" + value;
     }
 
     @ShellMethod("make a place")
     public String mkp(String name, String value) {
-        mem.places.put(name, new Place(value));
+        mem.getPlaces().put(name, new Place(value));
         return "[+] " + name + "=" + value;
     }
 
@@ -48,13 +46,13 @@ public class ManagementCommands {
 
     @ShellMethod("remove a variable")
     public String rmv(String name) {
-        mem.vars.remove(name);
+        mem.getVars().remove(name);
         return "[-] " + name;
     }
 
     @ShellMethod("remove a place")
     public String rmp(String name) {
-        mem.places.remove(name);
+        mem.getPlaces().remove(name);
         return "[-] " + name;
     }
 
@@ -63,8 +61,14 @@ public class ManagementCommands {
         return "not ready yet";
     }
 
-    @ShellMethod("test place template")
-    public String test(String name) {
-        return UriComponentsBuilder.fromUriString(mem.places.get(name).getUriTemplate()).build(mem.vars).toString();
+    @ShellMethod("validate a place template")
+    public String validate(String place) {
+        return mem.validatePlace(place);
+    }
+
+    @ShellMethod("save memory to file")
+    public String save() {
+        mem.save();
+        return "[+] successfully saved memory; it will load automatically on next launch";
     }
 }

@@ -1,13 +1,11 @@
 package com.jonathanrobertson.restflows.models;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Data
-@RequiredArgsConstructor
-//@AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode
 public class Place {
-    private final String uriTemplate;
+    private String uriTemplate;
 }

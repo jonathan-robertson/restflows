@@ -85,6 +85,7 @@ public class RestCommands {
 
     @ShellMethod("Retrieve OPTIONS from the provided place")
     public String options(String place) {
+
         return request(HttpMethod.OPTIONS, place).getBody();
     }
 
@@ -95,7 +96,7 @@ public class RestCommands {
 
     private ResponseEntity<String> request(HttpMethod method, String place) {
         // TODO: check out https://docs.postman-echo.com/?version=latest
-        ResponseEntity<String> response = rest.exchange(mem.places.get(place).getUriTemplate(), method, null, String.class, mem.vars);
+        ResponseEntity<String> response = rest.exchange(mem.getPlaces().get(place).getUriTemplate(), method, null, String.class, mem.getVars());
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw HttpClientErrorException.create(
@@ -104,22 +105,8 @@ public class RestCommands {
                     response.getHeaders(),
                     Optional.ofNullable(response.getBody()).map(String::getBytes).get(),
                     null);
-//            throw new HttpClientErrorException(response.getStatusCode(), errJoiner
-//                    .add("method:" + method)
-//                    .add("uriTemplate:" + mem.places.get(place).getUriTemplate())
-//                    .add("body:" + response.getBody())
-//                    .toString());
         }
 
         return response;
-
-//        if (response.hasBody()) {
-//            return Optional.ofNullable(response.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE))
-//                    .filter(s -> s.equals("application/json"))
-//                    .map(s -> "blork")
-//                    .orElse(response.getBody());
-//        } else {
-//            return "[no body provided in response]";
-//        }
     }
 }
