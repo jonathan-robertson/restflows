@@ -7,5 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Place {
-    private String uriTemplate;
+	private String uriTemplate;
 }

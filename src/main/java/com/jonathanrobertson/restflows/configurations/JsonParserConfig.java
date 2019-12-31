@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Bean;
 @SpringBootConfiguration
 public class JsonParserConfig {
 
-    @Bean
-    public JsonParser getJsonParser() {
-        return JsonParserFactory.getJsonParser();
-    }
+	@Bean
+	public JsonParser getJsonParser() {
+		return JsonParserFactory.getJsonParser();
+	}
 }
