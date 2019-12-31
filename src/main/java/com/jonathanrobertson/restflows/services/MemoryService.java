@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -70,7 +71,8 @@ public class MemoryService {
     }
 
     private Memory load() {
-        try (FileReader r = new FileReader(FILENAME)) {
+        try {
+            FileReader r = new FileReader(FILENAME);
             return mapper.readValue(r, Memory.class);
         } catch (IOException e) {
             log.warn("unable to load " + FILENAME + " - defaulting to new memory set", e);
