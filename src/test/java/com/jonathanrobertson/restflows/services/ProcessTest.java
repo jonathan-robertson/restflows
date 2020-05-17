@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.StringJoiner;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ProcessTest {
 
