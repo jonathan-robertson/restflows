@@ -7,6 +7,7 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -19,15 +20,18 @@ import com.jonathanrobertson.restflows.models.Place;
 @Slf4j
 @Service
 public class MemoryService {
-	private final String FILENAME = "restflows-memory.json"; // TODO; add to yaml config file?
 
 	private final ObjectMapper		mapper;
 	private final PathfinderService	pathfinder;
-	private final Memory			memory;
+	private final String			filename;
 
-	public MemoryService(ObjectMapper mapper, PathfinderService pathfinder) {
+	private final Memory memory;
+
+	public MemoryService(ObjectMapper mapper, PathfinderService pathfinder, @Value("${restflows.memory-service.filename}") String filename) {
 		this.mapper = mapper;
 		this.pathfinder = pathfinder;
+		this.filename = filename;
+
 		this.memory = load();
 	}
 
@@ -65,7 +69,7 @@ public class MemoryService {
 	 * @throws IOException if unable to write memory to file
 	 */
 	public void save() {
-		try (FileWriter w = new FileWriter(FILENAME)) {
+		try (FileWriter w = new FileWriter(filename)) {
 			w.write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this.memory));
 		} catch (IOException e) {
 			log.error("unable to save to file", e);
@@ -75,10 +79,10 @@ public class MemoryService {
 
 	private Memory load() {
 		try {
-			FileReader r = new FileReader(FILENAME);
+			FileReader r = new FileReader(filename);
 			return mapper.readValue(r, Memory.class);
 		} catch (IOException e) {
-			log.warn("unable to load " + FILENAME + " - defaulting to new memory set", e);
+			log.warn("unable to load " + filename + " - defaulting to new memory set", e);
 			return new Memory();
 		}
 	}

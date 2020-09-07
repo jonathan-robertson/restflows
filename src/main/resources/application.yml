@@ -1,0 +1,3 @@
+restflows:
+  memory-service:
+    filename: "restflows-memory.json"
