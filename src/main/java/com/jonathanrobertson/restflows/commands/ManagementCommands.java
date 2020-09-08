@@ -1,5 +1,6 @@
 package com.jonathanrobertson.restflows.commands;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.shell.standard.ShellComponent;
@@ -12,12 +13,9 @@ import com.jonathanrobertson.restflows.services.MemoryService;
 
 @Slf4j
 @ShellComponent
+@AllArgsConstructor
 public class ManagementCommands {
 	private final MemoryService mem;
-
-	public ManagementCommands(MemoryService mem) {
-		this.mem = mem;
-	}
 
 	@ShellMethod("show values from memory")
 	public String show(@ShellOption(value = { "-f", "--filter" }, defaultValue = "") String filter, @ShellOption(value = { "-p", "--pretty" }, defaultValue = "false") boolean pretty) throws JsonProcessingException {
