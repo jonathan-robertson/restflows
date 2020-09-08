@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.jonathanrobertson.restflows.services.MemoryService;
@@ -18,7 +17,7 @@ import com.jonathanrobertson.restflows.services.MemoryService;
 @ShellComponent
 public class RestCommands {
 	private static final StringJoiner	errJoiner		= new StringJoiner("; ", "[!] request failed", "");
-	protected static final StringJoiner	newlineJoiner	= new StringJoiner("\n");
+	private static final StringJoiner	newlineJoiner	= new StringJoiner("\n");
 
 	private final JsonParser	jsonParser;
 	private final RestTemplate	rest;
@@ -97,17 +96,6 @@ public class RestCommands {
 
 	private ResponseEntity<String> request(HttpMethod method, String place) {
 		// TODO: check out https://docs.postman-echo.com/?version=latest
-		ResponseEntity<String> response = rest.exchange(mem.getPlaces().get(place).getUriTemplate(), method, null, String.class, mem.getVars());
-
-		if (!response.getStatusCode().is2xxSuccessful()) {
-			throw HttpClientErrorException.create(
-					response.getStatusCode(),
-					response.getStatusCode().getReasonPhrase(),
-					response.getHeaders(),
-					Optional.ofNullable(response.getBody()).map(String::getBytes).get(),
-					null);
-		}
-
-		return response;
+		return rest.exchange(mem.getPlaces().get(place).getUriTemplate(), method, null, String.class, mem.getVars());
 	}
 }
