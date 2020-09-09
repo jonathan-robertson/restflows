@@ -1,8 +1,6 @@
 package com.jonathanrobertson.restflows.commands;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 
 import lombok.AllArgsConstructor;
 
@@ -10,6 +8,7 @@ import org.springframework.boot.json.JsonParser;
 import org.springframework.http.*;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.client.RestTemplate;
 
 import com.jonathanrobertson.restflows.services.MemoryService;
@@ -24,13 +23,16 @@ public class RestCommands {
 	private final MemoryService	mem;
 
 	@ShellMethod("Submit a REST request to the provided place")
-	public String go(String method, String place/*
-												 * , @ShellOption(defaultValue = "__NONE__") String
-												 * body, @ShellOption(defaultValue = "__NONE__") MultiValueMap<String, String>
-												 * headers
-												 */) {
-		return deserialize(request(method, place, /* new HttpEntity<>(body, headers) */ null));
+	public String go(
+			@ShellOption(help = "GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS|TRACE, case insensitive") String method,
+			@ShellOption(help = "see places by running `show -p -f places`") String place,
+			@ShellOption(help = "JSON payload for POST|PUT|PATCH method", defaultValue = ShellOption.NULL) String body,
+			@ShellOption(defaultValue = ShellOption.NULL) HttpHeaders headers) {
+		return deserialize(request(method, place, new HttpEntity<>(body, headers)));
 	}
+
+	// TODO: create ValueProvider class to suggest TAB-Completion values:
+	// https://docs.spring.io/spring-shell/docs/2.0.0.M2/api/org/springframework/shell/standard/ValueProvider.html
 
 	@ShellMethod("Retrieve GET from the provided place")
 	public String get(String place) {
@@ -106,6 +108,8 @@ public class RestCommands {
 	private ResponseEntity<String> request(String method, String place, HttpEntity<String> requestEntity) {
 		HttpMethod httpMethod = HttpMethod.valueOf(method.toUpperCase());
 		String uriTemplate = mem.getPlaces().get(place).getUriTemplate();
-		return rest.exchange(uriTemplate, httpMethod, requestEntity, String.class, mem.getVars());
+		ResponseEntity<String> response = rest.exchange(uriTemplate, httpMethod, requestEntity, String.class, mem.getVars());
+		System.out.println(response.getHeaders());
+		return response;
 	}
 }
