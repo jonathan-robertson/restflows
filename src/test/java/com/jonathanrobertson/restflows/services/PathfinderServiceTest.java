@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.jonathanrobertson.restflows.configurations.ObjectMapperConfig;
+import com.jonathanrobertson.restflows.configurations.JsonConfig;
 
-@SpringBootTest(classes = { PathfinderService.class, ObjectMapperConfig.class })
+@SpringBootTest(classes = { PathfinderService.class, JsonConfig.class })
 public class PathfinderServiceTest {
 	private static final String TEXT = "{ \"request\": { \"args\": [ { \"foo\": \"dance\" }, { \"foo\": \"at\" }, { \"foo\": \"midnight\" } ] }, \"response\": { \"status\": 204 } }";
 
